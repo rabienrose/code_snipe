@@ -1,0 +1,136 @@
+*** Settings ***
+Library           OperatingSystem
+Library           String
+
+*** Variables ***
+${src_code_path}    /media/psf/chamo/working/matlab_slam/v2.0/
+${branch}         feature/slam2_test_temp
+${src_folder_name}    algorithm
+${commit_id}      ${EMPTY}
+
+*** Test Cases ***
+init_env
+    [Documentation]    step1.Clone Code
+    ...    step2.checkout spec branch
+    ...    step3.build
+    [Tags]    1
+    ${git_root}    Set Variable    ${CURDIR}/algorithm
+    Run Keyword if    not os.path.exists('${git_root}')    Run    git clone ssh://git@stash.ygomi.com:7999/rc/algorithm.git
+    ${git_re}    Run    cd ${git_root}; git branch
+    ${re}    Get Lines Containing String    ${git_re}    * ${branch}
+    ${re}    Run Keyword If    '${re}' == ''    Run    cd ${git_root}; git checkout ${branch}
+    ${re}    Run    cd ${git_root}; git pull
+    ${commit_id}    Run    cd ${git_root}; git rev-parse HEAD
+    ${commit_id_short}    Evaluate    '${commit_id}'[0:6]
+    Set Suite Variable    ${commit_id}    ${commit_id_short}
+    ${re}    Compile CMake    ${git_root}/v2.0/3rdparty/g2o
+    ${re}    Compile CMake    ${git_root}/v2.0/cplusplus/workspace/main
+    Comment    Get From Ftp    Resource    ./resource
+
+case1
+    [Documentation]    vehicle color: black
+    ...    lane number: left 1
+    ...    total tracks: 4
+    Log    ${commit_id}
+    Run Keyword if    os.path.exists('output')    Empty Directory    output
+    Run SLAM Case    GM1    jpg_20160508151815    1    1800
+    Run SLAM Case    GM2    jpg_20160508151815    4101    5900
+    Run SLAM Case    GM3    jpg_20160508151815    301    2100
+    Run SLAM Case    GM4    jpg_20160508151815    3581    5380
+    Run SLAM Case    GM5    jpg_20160523152741    1    1800
+    Run SLAM Case    GM6    jpg_20160523152741    1461    3260
+    Run SLAM Case    GM7    jpg_20160523152741    5801    7600
+    Run SLAM Case    GM8    jpg_20160511185841    1881    3680
+    Run SLAM Case    GM9    jpg_20160511185841    3601    5400
+    Run SLAM Case    GM10    jpg_20160511192830    1351    3150
+    Run SLAM Case    GM11    jpg_20160511192830    2901    4700
+    Run SLAM Case    GM12    jpg_20160511192830    4601    6400
+    Run SLAM Case    GM13    jpg_20160511192830    1    1800
+    Run SLAM Case    GM14    jpg_20160511192830    3481    5280
+    Run SLAM Case    GM15    jpg_20160511192830    7011    8810
+    Run SLAM Case    GM16    jpg_20160509135725    5641    7440
+    Run SLAM Case    GM17    jpg_20160509140224    6331    8130
+    Run SLAM Case    GM18    jpg_20160509142149    5201    7000
+    Run SLAM Case    GM19    jpg_20160509145800    1    1800
+    Run SLAM Case    GM20    jpg_20160509145800    5251    7050
+
+case2
+    [Documentation]    vehicle color: black
+    ...    lane number: left 1 2 3
+    ...    total tracks: 4
+    [Tags]    1=
+    Run    cp ./output/report.txt \ ./output/report_${commit_id}.txt
+    Run    cp ${LOG FILE} ./output/log_${commit_id}.html
+
+case 3
+    Compare Re    GM1
+    Compare Re    GM2
+    Compare Re    GM3
+    Compare Re    GM4
+    Compare Re    GM5
+    Compare Re    GM6
+    Compare Re    GM7
+    Compare Re    GM8
+    Compare Re    GM9
+    Compare Re    GM10
+    Compare Re    GM11
+    Compare Re    GM12
+    Compare Re    GM13
+    Compare Re    GM14
+    Compare Re    GM15
+    Compare Re    GM16
+    Compare Re    GM17
+    Compare Re    GM18
+    Compare Re    GM19
+    Compare Re    GM20
+
+*** Keywords ***
+Compile CMake
+    [Arguments]    ${path}
+    Create Directory    ${path}/build
+    ${re}    Run    cd ${path}/build; cmake -DCMAKE_BUILD_TYPE=Release ../; make
+    Create File    ${path}/compile_re.txt    ${re}
+    Should Contain    ${re}    [100%] Built target
+    [Return]    ${re}
+
+Run SLAM Case
+    [Arguments]    ${name}    ${img}    ${start}    ${end}
+    ${executable_path}    Set Variable    ${CURDIR}/algorithm/v2.0/cplusplus/workspace/main
+    ${executable}    Set Variable    ${executable_path}/slam_example
+    ${fx}    Set Variable    1079.5
+    ${fy}    Set Variable    1078.8
+    ${cx}    Set Variable    640.3024
+    ${cy}    Set Variable    355.4653
+    ${config}    Set Variable    ${CURDIR}/algorithm/v2.0/config/config_GM.xml
+    ${img_path}    Set Variable    ${CURDIR}/resource/Image/GM/${img}/
+    ${output_dir}    Set Variable    ./output/${name}_${commit_id}/
+    Create Directory    output
+    Create Directory    output/${name}_${commit_id}
+    Empty Directory    output/${name}_${commit_id}
+    ${re}    Run    ${executable} ${img_path} ${config} ${start} ${end} ${fx} ${fy} ${cx} ${cy} ${name} ${output_dir}
+    Create File    ${CURDIR}/output/${name}_${commit_id}/output.txt    ${re}
+
+Get From Ftp
+    [Arguments]    ${ftp_dir}    ${local_dir}
+    ${re}    Run    lftp -u RDB_6T_san:CruTrU5ayu sftp://10.69.6.18 -p 22 -e "set net:timeout 20;set net:max-retries 4;set net:reconnect-interval-base 10;set net:reconnect-interval-multiplier 1;cd user_dir/CoreTestCase/${ftp_dir};mirror ./ ${local_dir};quit"
+
+Copy To Ftp
+    [Arguments]    ${ftp_dir}    ${local_dir}
+    ${re}    Run    cd ${local_dir}; lftp -u RDB_6T_san:CruTrU5ayu sftp://10.69.6.18 -p 22 -e "set net:timeout 20;set net:max-retries 4;set net:reconnect-interval-base 10;set net:reconnect-interval-multiplier 1;cd user_dir/CoreTestCase/${ftp_dir};mirror -R ./ ./;quit"
+
+Run Python
+    [Arguments]    ${py_path}
+    ${re}    Run    python3.5 ${py_path}
+    Create File    ${CURDIR}/output/summary_py.txt    ${re}
+
+Compare Re
+    [Arguments]    ${case_name}
+    ${re}    RUN    cd script/slam_gps_compare/build_u; make
+    Should Contain    ${re}    [100%] Built target
+    ${name}    Set Variable    ${case_name}
+    ${case_file}    Set Variable    table/slam_basic_case.csv
+    ${re}    RUN    python3.5 script/slam_gps_compare/slam_basic_case.py ${case_file} \ ${name}
+    @{case}    Split String    ${re}
+    ${gps}    Set Variable    /media/psf/chamo/dataset/gm/list_@{case}[0].txt.out
+    ${slam}    Set Variable    /media/psf/chamo/dataset/output/${name}_5ee92f/traj.txt
+    ${re}    RUN    script/slam_gps_compare/CheckTraj ${gps} ${slam} ${name} ./output/

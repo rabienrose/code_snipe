@@ -1,0 +1,19 @@
+function txt = ReprojTipCB(~,event_obj,t)
+global coreDataMatrix;
+pos = get(event_obj,'Position');
+frameId = event_obj.Target.UserData(1);
+kId = event_obj.Target.UserData(2);
+mpId = event_obj.Target.UserData(3);
+depth = event_obj.Target.UserData(4);
+z = coreDataMatrix.mpPosiMatrix(3, mpId);
+trackC = coreDataMatrix.mpTracksCountVec(mpId, 1);
+oct = coreDataMatrix.kpOctaveMatrix(kId, frameId);
+txt = {['X: ',num2str(pos(1))],...
+       ['Y: ',num2str(pos(2))],...
+       ['Z: ',num2str(depth)],...
+       ['Obs: ',num2str(trackC)],...
+       ['Oct: ',num2str(oct)],...
+       ['MId: ',num2str(mpId)],...
+       ['KId: ',num2str(kId)]
+       };
+end

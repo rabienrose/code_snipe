@@ -1,0 +1,6 @@
+#define TEST_INTEGRATION_PATH "/var/lib/jenkins/workspace/gazebo7-debbuilder/build/gazebo-7.5.0/test/integration"
+#define TEST_REGRESSION_PATH "/var/lib/jenkins/workspace/gazebo7-debbuilder/build/gazebo-7.5.0/test/regression"
+#define TEST_UNIT_PATH "/var/lib/jenkins/workspace/gazebo7-debbuilder/build/gazebo-7.5.0/test/unit"
+#define TEST_PATH "/var/lib/jenkins/workspace/gazebo7-debbuilder/build/gazebo-7.5.0/test"
+#define PROJECT_SOURCE_PATH "/var/lib/jenkins/workspace/gazebo7-debbuilder/build/gazebo-7.5.0"
+#define PROJECT_BINARY_PATH "/var/lib/jenkins/workspace/gazebo7-debbuilder/build/gazebo-7.5.0/obj-x86_64-linux-gnu"
