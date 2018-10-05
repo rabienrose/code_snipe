@@ -1,0 +1,121 @@
+#!/bin/bash
+rtv_root_ftp=/upload/extensive_test/us/AuburnHill/1-RTV/Day/New_Route1
+declare -a rtv_list=(\
+${rtv_root_ftp}/2018-01-21_T_22-02-35.313_GMT \
+${rtv_root_ftp}/2018-01-21_T_22-08-28.639_GMT \
+${rtv_root_ftp}/2018-01-21_T_22-13-28.645_GMT \
+${rtv_root_ftp}/2018-01-21_T_22-18-28.651_GMT \
+${rtv_root_ftp}/2018-01-21_T_22-23-28.659_GMT \
+${rtv_root_ftp}/2018-01-21_T_22-28-28.666_GMT \
+${rtv_root_ftp}/2018-01-21_T_22-30-41.107_GMT \
+${rtv_root_ftp}/2018-01-22_T_19-32-42.920_GMT \
+${rtv_root_ftp}/2018-01-22_T_19-37-42.926_GMT \
+${rtv_root_ftp}/2018-01-22_T_19-42-42.934_GMT \
+${rtv_root_ftp}/2018-01-22_T_19-46-50.862_GMT \
+${rtv_root_ftp}/2018-01-22_T_20-30-47.295_GMT \
+${rtv_root_ftp}/2018-01-22_T_20-35-47.301_GMT \
+${rtv_root_ftp}/2018-01-22_T_20-40-47.308_GMT \
+${rtv_root_ftp}/2018-01-22_T_20-45-47.313_GMT \
+
+)
+declare -a inc_rtv_list=(\
+
+)
+db_ftp=/upload/extensive_test/us/AuburnHill/1-RTV/Day/db
+input_db_ftp=none
+
+rtv_root=/media/psf/Untitled/ces_zili
+source_code=/home/test/Downloads/full_algo_source_code
+config_addr=${source_code}/core/vehicle/config
+maplist_name=maplist.txt
+inclist_name=inclist.txt
+sam_output_name=output_sam
+
+if [[ ${input_db_ftp} == "none" ]]; then
+    rm -rf ${rtv_root}/*
+    rm -rf ./*
+    for rtv_item in "${rtv_list[@]}"
+    do
+        echo ${rtv_item}
+        sshpass -p "WuiIBTKLjCglwh" sftp -r -oPort=22 roadDB@10.69.6.12:${rtv_item} ${rtv_root}
+    done
+    
+    for rtv_name in `ls ${rtv_root}`
+    do
+        ${source_code}/core/algorithm_vehicle/vehicle/SLAM2.0/example/debug/algoSlamExe --ic ${config_addr}/camera65.json --ip ${config_addr}/slamConfig.json --ivg ${rtv_root}/${rtv_name}/${rtv_name}.rtv --ivid 170ca9d4e6b40738 --osp sp.out/ --ort rt.out --idb ./ --ol ./log_slam --ivoc ${config_addr}/Highway_Detroit_Downtown_sum--0--1799-4_voc --tmp ./output/ --d ./output/ --iimu ${rtv_root}/${rtv_name}/${rtv_name}.imu
+        for file_name in `ls .`
+        do
+            if [[ ${file_name} == "SlamSnippet"* ]]; then
+                echo ${file_name}
+                mv ./${file_name} ./output/${rtv_name}.rtv/${file_name}
+            fi
+        done
+    done
+    
+    if [ -f ${maplist_name} ]; then
+       rm ${maplist_name}
+    fi
+    
+    echo "#############start to create map list###################"
+    
+    for file_name in `ls ./output`
+    do
+        if [[ ${file_name} == *".rtv" ]]; then
+            echo ${file_name}
+            for snip_name in `ls ./output/${file_name}`
+            do
+                if [[ ${snip_name} == "SlamSnippet"* ]]; then
+                    echo ${snip_name}
+                    echo output/${file_name}/${snip_name} >> ${maplist_name}
+                fi
+            done
+        fi
+    done
+    
+    echo "##############start to run serverExampleSlam##############"
+    ${source_code}/core/algorithm_server_3/example/serverExampleSlam/build/serverExampleSlam 1 . ./${sam_output_name}
+    
+
+else
+    rm -rf ./*
+    mkdir ./${sam_output_name}
+    sshpass -p "WuiIBTKLjCglwh" sftp -r -oPort=22 roadDB@10.69.6.12:${input_db_ftp}/section_out ./${sam_output_name}
+    sshpass -p "WuiIBTKLjCglwh" sftp -r -oPort=22 roadDB@10.69.6.12:${input_db_ftp}/section_db ./${sam_output_name}
+fi
+
+
+rm -rf ${rtv_root}/*
+for rtv_item in "${inc_rtv_list[@]}"
+do
+    echo ${rtv_item}
+    sshpass -p "WuiIBTKLjCglwh" sftp -r -oPort=22 roadDB@10.69.6.12:${rtv_item} ${rtv_root}
+done
+
+db_addr=./${sam_output_name}/section_out
+for rtv_name in `ls ${rtv_root}`
+do
+	${source_code}/core/algorithm_vehicle/vehicle/SLAM2.0/example/debug/algoSlamExe --ic  ${config_addr}/camera65.json --ip ${config_addr}/slamConfig.json --ivg ${rtv_root}/${rtv_name}/${rtv_name}.rtv --ivid 170ca9d4e6b40738 --ort kf.out --osp sp.out/ --ort rt.out --idb ./ --dso ${db_addr} --ivoc ${config_addr}/Highway_Detroit_Downtown_sum--0--1799-4_voc --tmp ./output/ --d ./output/ --iimu ${rtv_root}/${rtv_name}/${rtv_name}.imu
+    if [ -f ${inclist_name} ]; then
+       rm ${inclist_name}
+    fi
+    incSnip_addr=./output/${rtv_name}.rtv/incSnippet.bin
+    if [ -f ${incSnip_addr} ]; then
+        echo output/${rtv_name}.rtv/incSnippet.bin >> ${inclist_name}
+        ${source_code}/core/algorithm_server_3/example/serverExampleSlam/build/serverExampleSlam 2 . ./${sam_output_name}
+    fi
+done
+
+sftp_out_name=`date +%Y-%m-%d-%H-%M-%S`_db
+cp -r ./${sam_output_name} ./${sftp_out_name}
+for file_name in `ls ./${sftp_out_name}`
+do
+    if [[ ${file_name} == "server_"* ]]; then
+        rm -r ./${sftp_out_name}/${file_name}/dump
+        rm -r ./${sftp_out_name}/${file_name}/output_smrz
+        rm -r ./${sftp_out_name}/${file_name}/pgl
+        rm -r ./${sftp_out_name}/${file_name}/se
+        rm -r ./${sftp_out_name}/${file_name}/gps/batch
+        rm -r ./${sftp_out_name}/${file_name}/gps/vehicle
+    fi
+done
+sshpass -p 'WuiIBTKLjCglwh' scp -r ./${sftp_out_name} roadDB@10.69.6.12:${db_ftp}/${sftp_out_name}
