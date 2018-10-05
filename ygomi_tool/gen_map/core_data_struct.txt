@@ -1,0 +1,78 @@
+core_data{
+	width:(int)
+	height:(int)
+	view_angle:(int)
+	frames:
+	[
+		{
+			id:(int)
+			lane_id:(int)
+			pose:(list44)
+			mp_list:[mp_id:(int),]
+			ts_list:[ts_id:(int),]
+			line_list:[line_id:[line_pt_id:(int),],]
+		},
+	]
+	mps:
+	[
+		{
+			id:(int)
+			posi:[x:(double), y:(double), z:(double)]
+			color:[r:(double), g:(double), b:(double)]
+			desc:[(float),]
+			track:
+			[
+				{
+					frame_id:(int)
+					uv:[u:(double), v:(double)]
+				},
+			]
+		},
+	]
+	trafficsign:
+	[
+		{
+			id:(int)
+			center:[x:(double), y:(double), z:(double)]
+			orientation:(list44)
+			vertice:[[x:(double), y:(double), z:(double)],]
+			size:[width:(double), height:(double)]
+			ROI:
+			[
+				{
+					 frame_id:(int)
+					 bound_h:(int)
+					 bound_w:(int)
+					 bound_ax:[u:(double), v:(double)] #left top corner
+					 uvs:[u:(double), v:(double),] #4 points
+				}, 
+			]
+		},
+	]
+	lines:
+	[
+		{
+			line_id:(int)
+			line_points:[[x:(double), y:(double), z:(double)],]
+			l_lane_id:(int)
+			r_lane_id:(int)
+			images:
+			[
+				{
+					 frame_id:(int)
+					 uvs:[u:(double), v:(double),]
+				},
+			]
+		},
+	]
+	lanes:
+	[
+		{
+			lane_id:(int)
+			lane_points:[[x:(double), y:(double), z:(double)],]
+			l_line_id:(int)
+			r_line_id:(int)
+			trajectory:[traj_id:[frame_id:(int),]]
+		},
+	]
+}

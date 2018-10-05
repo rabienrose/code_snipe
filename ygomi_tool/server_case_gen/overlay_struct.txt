@@ -1,0 +1,26 @@
+section=
+{
+    traj_id:(int)
+    traj_start:(int)
+    traj_end:(int)
+    traj_len:(int)
+}
+
+overlay=
+[
+    (section),
+]
+
+core_data:
+{
+    trajs:
+    [
+        {
+            file_name:(string)
+            links:
+            [
+                (overlay),
+            ]
+        }，
+    ]
+}

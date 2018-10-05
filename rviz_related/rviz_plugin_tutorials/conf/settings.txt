@@ -1,0 +1,48 @@
+Control
+{
+    ########
+    local_ip=10.69.144.38
+    remote_ip=10.69.144.155
+    remote_account=user
+    remote_password=19900411
+
+    ########
+    dataReceiver_path=/opt/ygomi/roadDB/bin
+
+    ########
+    bow_file=/home/user/Downloads/testdata/bow/merged_two_lanes_voc.bin
+    database_path=/home/user/Downloads/testdata/GM_DB_NEW/2.3.1.2_data/2.3.1.2/vehicleDB/
+    code_path=/home/user/workspace/new_loc/core/algorithm_vehicle_localization/
+
+    rtv_path=~/Downloads/testdata/
+    rosbag_path=~/Downloads/testdata/
+
+
+    abox_db_root=/usr/local/ygomi/roadDB/algo_res/loc_database/
+
+    img_path_when_run_Asample=/home/test/Documents/ROS_LOC/offline_img/case_890/jpg_for_algo/
+
+
+    ########
+    scale_resize=0.625
+    switch_run_Asample=False
+    switch_remote_control=False
+    switch_show_dgps=False
+
+
+    ########
+    show_ROI=True
+    switch_use_ROI=False
+    ROI_area1=0,0,100,400
+    ROI_area2=170,200,300,200
+    ROI_area3=540,0,100,400
+}
+
+View
+{
+    yaw=0.0
+    pitch=0.0
+    roll=0.0
+    mode=Free3d
+}
+

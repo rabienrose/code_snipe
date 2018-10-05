@@ -1,0 +1,4 @@
+geometry_msgs/Point absGPS
+geometry_msgs/Point refGPS
+---
+geometry_msgs/Point relGPS

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>dependency_correlation</name>
+  <version>0.0.0</version>
+  <description>The dependency_correlation package</description>
+
+  <maintainer email="root@todo.todo">root</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <build_depend>show_map</build_depend>
+  <build_depend>painting_cov</build_depend>
+  <build_depend>record_msg</build_depend>
+  <build_depend>ros_loc_server</build_depend>
+  <build_depend>rviz_animated_view_controller</build_depend>
+  <build_depend>rviz_plugin_tutorials</build_depend>
+  <build_depend>veh_msg</build_depend>
+  
+
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>
