@@ -1,0 +1,42 @@
+from matplotlib import pyplot as plt;
+import numpy as np;
+from mpl_toolkits.mplot3d import axes3d
+
+imu_data=[]
+#with open('/home/albert/Desktop/1123openhouse/wayz_11_23_night.bag_trajectory.txt', 'r') as imuData:
+with open('/mnt/nfs/hdmap/lidar_slam/wayz_2018_11_23/wayz_11_23_night_result/traj.txt', 'r') as imuData:
+    lines=imuData.readlines()
+    for line in lines:
+        lineData=line.strip().split(' ')
+        imu_data.append(lineData)
+
+x     = np.zeros(len(imu_data))
+y     = np.zeros(len(imu_data))
+z     = np.zeros(len(imu_data))
+t     = np.zeros(len(imu_data))
+
+for i in range(len(imu_data)):
+    t[i]     = i
+    x[i]     = float(imu_data[i][2])
+    y[i]     = float(imu_data[i][3])
+    z[i]     = float(imu_data[i][4])
+
+plt.plot(x,y,'r',label='xy')
+#plt.plot(t,y,'b',label='dt')
+plt.legend
+plt.show()
+
+# new a figure and set it into 3d
+#fig = plt.figure()
+#ax = fig.gca(projection='3d')
+
+# set figure information
+#ax.set_title("3D_Curve")
+#ax.set_xlabel("x")
+#ax.set_ylabel("y")
+#ax.set_zlabel("z")
+
+# draw the figure, the color is r = read
+#figure = ax.plot(x, y, z, c='r')
+
+#plt.show()
